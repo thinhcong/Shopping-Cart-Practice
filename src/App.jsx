@@ -19,14 +19,15 @@ function App() {
 
   
   const [productList, setProductList] = useState([]);
-  const [cartList, setCartList] = useState(() => {
-    const savedCart = localStorage.getItem("myCart");
-    return savedCart ? JSON.parse(savedCart) : [];
-  });
+  const [cartList, setCartList] = useState ([]);
+  // (() => {
+  //   const savedCart = localStorage.getItem("myCart");
+  //   return savedCart ? JSON.parse(savedCart) : [];
+  // });
 
-  useEffect(() => {
-    localStorage.setItem("myCart", JSON.stringify(cartList));
-  }, [cartList]); 
+  // useEffect(() => {
+  //   localStorage.setItem("myCart", JSON.stringify(cartList));
+  // }, [cartList]); 
 
 useEffect(() => {
   async function fetchProducts() {
@@ -47,27 +48,27 @@ useEffect(() => {
 }, []);
 
   // Hàm xử lí khi nhấn thêm sản phẩm
-  const handleAddToCart = (addedProduct) => {
-    if (addedProduct.stock <= 0) {
+  const handleAddToCart = (product,buyquantity = 1) => {
+    if (product.stock <= 0) {
       alert("Sản phẩm này đã hết hàng!");
       return;
     }
-    const isExit = cartList.find((item) => item.id === addedProduct.id);
+    const isExit = cartList.find((item) => item.id === product.id);
 
     if (isExit) {
       setCartList(cartList.map((item) => {
-        if (item.id === addedProduct.id) {
-          return { ...item, quantity: item.quantity + 1 }
+        if (item.id === product.id) {
+          return { ...item, quantity: item.quantity + buyquantity };
         } else {
           return item
         }
       }))
     } else {
-      setCartList([...cartList, { ...addedProduct, quantity: 1 }])
+      setCartList([...cartList, { ...product, quantity:  buyquantity }]);
     }
 
     const newProductList = productList.map(item => {
-      if (item.id === addedProduct.id) {
+      if (item.id === product.id) {
         return { ...item, stock: item.stock - 1 };
       }
       return item; 
@@ -135,6 +136,8 @@ useEffect(() => {
             <Route path="/product/:id" element={
                 <ProductDetails
                 productList={productList} 
+                 handleAddToCart ={handleAddToCart}
+                 handleDelete={handleDelete}
                 
 
             />

@@ -13,16 +13,6 @@ import { createClient } from '@supabase/supabase-js'
 //  * @param {String|null} userId - ID người dùng (nếu đã đăng nhập), hoặc null
 //  */
 
-/*************  ✨ Windsurf Command ⭐  *************/
-/**
- * Trang giỏ hàng của người dùng
- * Hiển thị danh sách sản phẩm đang có trong giỏ, tổng tiền và nút Thanh toán
- * 
- * @param {Array} cartList - Danh sách sản phẩm trong giỏ
- * @param {Function} handleDelete - Hàm xóa sản phẩm khỏi giỏ
- * @param {Function} handleAddToCart - Hàm thêm sản phẩm vào giỏ
- */
-/*******  004ed202-18ef-4f5d-82eb-90f7b2302084  *******/
 function CartPage({ cartList, handleDelete ,handleAddToCart }) {
 
   const totalAmount = cartList.reduce((total, item) => total + item.price * item.quantity, 0);

@@ -50,7 +50,7 @@ const MainContent = ({ productList, handleAddToCart }) => {
                       e.stopPropagation(); 
                       
                       // Sau đó mới chạy logic thêm vào giỏ
-                      handleAddToCart(product, index);
+                      handleAddToCart(product);
                     }} 
                     className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 active:bg-gray-900 transition-colors text-sm font-medium"
                 >
