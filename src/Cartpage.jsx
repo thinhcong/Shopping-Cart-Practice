@@ -14,12 +14,13 @@ import { createClient } from '@supabase/supabase-js'
 //  */
 
 function CartPage({ cartList, handleDelete ,handleAddToCart }) {
+    
 
   const totalAmount = cartList.reduce((total, item) => total + item.price * item.quantity, 0);
 
   return (
     <div className="container mx-auto p-10 bg-white  min-h-screen">
-      <h1 className="text-3xl font-bold mb-8 text-center uppercase tracking-wide">Giỏ hàng của bạn</h1>
+      {cartList.length > 0 && <h1 className="text-3xl font-bold mb-8 text-center uppercase tracking-wide">SHOPPING CART</h1>}
 
       {cartList.length === 0 ? (
         <div className="text-center">
@@ -64,7 +65,7 @@ function CartPage({ cartList, handleDelete ,handleAddToCart }) {
                     <div className="flex justify-center gap-4">
                         <button 
                             onClick={() => handleDelete(item)}
-                            className="text-black font-bold "
+                            className="text-black font-bold  "
                         >
                             -
                         </button>

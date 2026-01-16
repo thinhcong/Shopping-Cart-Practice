@@ -3,14 +3,27 @@ import { Routes, Route } from 'react-router-dom' // Import Router
 import './App.css'
 import { supabase } from "./supabaseClient.js";
 
+/////////////////////////////////////// PRATICE NEW FEATURE ///////////////////////////////////////////////
+
+
+// Disable nút + khi vượt stock
+
+// Disable “Thêm vào giỏ” khi stock = 0
+
+// Hiển thị: “Bạn đã có X sản phẩm này trong giỏ”
+
+
+/////////////////////////////////////// PRATICE NEW FEATURE ///////////////////////////////////////////////
 
 
 
 // Import các component
-import Header from './component/Header'
-import Home from './component/Home'        
-import CartPage from './component/CartPage' 
-import ProductDetails from './component/ProductDetails/index.jsx';
+
+import Home from './Home.jsx'        
+import CartPage from './Cartpage.jsx' 
+import ProductDetails from './ProductDetails.jsx';
+import Header from './component/Header/index.jsx';
+
 
 
 
@@ -20,14 +33,37 @@ function App() {
   
   const [productList, setProductList] = useState([]);
   const [cartList, setCartList] = useState ([]);
-  // (() => {
-  //   const savedCart = localStorage.getItem("myCart");
-  //   return savedCart ? JSON.parse(savedCart) : [];
-  // });
+  
+    const [user, setUser] = useState(null);
+    const [admin,setAdmin] = useState(null);  
+    useEffect(() => {
+        
+        const getSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            setUser(session?.user ?? null);
+        };
+        getSession();
 
-  // useEffect(() => {
-  //   localStorage.setItem("myCart", JSON.stringify(cartList));
-  // }, [cartList]); 
+        //  Lắng nghe đăng nhập/đăng xuất
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null);
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+    
+    };
+//   // (() => {
+//   //   const savedCart = localStorage.getItem("myCart");
+//   //   return savedCart ? JSON.parse(savedCart) : [];
+//   // });
+
+//   // useEffect(() => {
+//   //   localStorage.setItem("myCart", JSON.stringify(cartList));
+//   // }, [cartList]); 
 
 useEffect(() => {
   async function fetchProducts() {
@@ -44,6 +80,27 @@ useEffect(() => {
   }
 
   fetchProducts();
+  const channel = supabase
+      .channel('realtime products') 
+      .on('postgres_changes', 
+          { event: 'UPDATE', schema: 'public', table: 'products' }, 
+          (payload) => {
+            console.log('Có thay đổi nè:', payload);
+            
+            // Cập nhật lại state productList ngay lập tức
+            setProductList((prevList) => 
+              prevList.map((item) => 
+                item.id === payload.new.id ? payload.new : item
+              )
+            );
+          }
+      )
+      .subscribe();
+
+    // 3. Dọn dẹp khi component bị hủy (unmount)
+    return () => {
+      supabase.removeChannel(channel);
+    };
 
 }, []);
 
@@ -69,7 +126,7 @@ useEffect(() => {
 
     const newProductList = productList.map(item => {
       if (item.id === product.id) {
-        return { ...item, stock: item.stock - 1 };
+        return { ...item, stock: item.stock - buyquantity };
       }
       return item; 
     });
@@ -111,34 +168,25 @@ useEffect(() => {
   return (
     <div className=''>
       {/* Header luôn hiển thị */}
-      <Header cartList={cartList} />
+        <Header cartList={cartList} handleLogout={handleLogout} admin={admin} user={user} />
 
       {/* Phần nội dung thay đổi theo Router */}
       
         <Routes>
            <Route path="/" element={
-              <Home 
-                 productList={productList} 
-                 cartList={cartList} 
-                 handleAddToCart={handleAddToCart}                
-                 handleDelete={handleDelete}
+              <Home cartList={cartList} productList={productList} handleAddToCart={handleAddToCart}
+               
               />
            } />
 
            <Route path="/cart" element={
-              <CartPage 
-                 handleAddToCart={handleAddToCart}
-                 productList={productList}
-                 cartList={cartList} 
-                 handleDelete={handleDelete}
+              <CartPage cartList={cartList} handleAddToCart={handleAddToCart} handleDelete={handleDelete}
+                
               />
            } />
             <Route path="/product/:id" element={
-                <ProductDetails
-                productList={productList} 
-                 handleAddToCart ={handleAddToCart}
-                 handleDelete={handleDelete}
-                
+                <ProductDetails cartList={cartList} handleAddToCart={handleAddToCart} productList={productList} 
+               
 
             />
             }/>

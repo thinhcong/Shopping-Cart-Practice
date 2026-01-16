@@ -1,11 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const MainContent = ({ productList, handleAddToCart }) => {
+const MainContent = ({productList,handleAddToCart}) => {
+  // const [cartList, setCartList] = useState ([]);
   const navigate = useNavigate();
 
-  // Lưu ý: Không cần định nghĩa handleClick ở đây vì biến 'product' chưa tồn tại ở scope này.
-  // Ta sẽ viết trực tiếp trong hàm map hoặc viết hàm nhận id làm tham số.
+
+
 
   const goToDetail = (id) => {
     navigate(`/product/${id}`);

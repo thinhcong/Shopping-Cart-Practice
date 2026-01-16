@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import Header from './component/Header';
 
-const ProductDetails = ({ productList, handleAddToCart }) => {
+const ProductDetails = ({ productList, handleAddToCart, cartList }) => {
   const params = useParams();
   const [product, setProduct] = useState(null);
   
@@ -43,8 +44,13 @@ const ProductDetails = ({ productList, handleAddToCart }) => {
   }
 
   return (
+    
     // 1. Container chính: Căn giữa, nền xám nhẹ
+    <>  
+    
+   
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 flex justify-center items-center">
+      
       
       {/* 2. Khung thẻ sản phẩm (Card): Nền trắng, đổ bóng, bo góc */}
       <div className="max-w-6xl w-full bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -105,6 +111,7 @@ const ProductDetails = ({ productList, handleAddToCart }) => {
                   {buyquantity}
                 </span>
                 <button 
+            disabled={product.stock <= 0}
                 onClick={() => handleAdd()}
                   className="px-4 py-3 bg-black  text-white hover:bg-gray-100transition"
                 >
@@ -126,6 +133,7 @@ const ProductDetails = ({ productList, handleAddToCart }) => {
         </div> 
       </div>
     </div>
+     </>
   );
 };
 
