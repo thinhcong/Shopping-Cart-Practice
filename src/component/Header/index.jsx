@@ -7,13 +7,10 @@ import { FaUser } from "react-icons/fa";
 import { supabase } from '../../supabaseClient.js';
 import AuthModal from '../Authmodal.jsx/index.jsx';
 
-const Header = ({user,cartList}) => {
+const Header = ({user,cartList,handleLogout}) => {
     
     const [isOpen, setIsOpen] = useState(false);
-    const handleLogout = async () => {
-        await supabase.auth.signOut();
-    }
-
+  
     let totalAmount = cartList.reduce((total, item) => total + item.price * item.quantity, 0);
     let totalQuantity = cartList.reduce((total, item) => total + item.quantity, 0);
 
@@ -36,9 +33,11 @@ const Header = ({user,cartList}) => {
                 {user ? (
                     // TRƯỜNG HỢP 1: ĐÃ ĐĂNG NHẬP (Hiện tên + Nút đăng xuất)
                     <div className="flex items-center gap-3">
+                        <Link to ="/user/profile">
                         <span className="text-sm font-bold hidden md:block">
                             {user.user_metadata?.full_name || "Khách hàng"}
                         </span>
+                        </Link>
                         <button 
                             onClick={handleLogout} 
                             className="text-sm bg-black text-white px-3 py-1 rounded hover:bg-gray-800 transition"

@@ -1,198 +1,106 @@
-import { useState, useEffect } from 'react'
-import { Routes, Route } from 'react-router-dom' // Import Router
+
+import { Routes, Route, Navigate } from 'react-router-dom' // Import Router
 import './App.css'
-import { supabase } from "./supabaseClient.js";
-
-/////////////////////////////////////// PRATICE NEW FEATURE ///////////////////////////////////////////////
-
-
-// Disable nút + khi vượt stock
-
-// Disable “Thêm vào giỏ” khi stock = 0
-
-// Hiển thị: “Bạn đã có X sản phẩm này trong giỏ”
-
-
-/////////////////////////////////////// PRATICE NEW FEATURE ///////////////////////////////////////////////
-
-
-
-// Import các component
-
-import Home from './Home.jsx'        
-import CartPage from './Cartpage.jsx' 
-import ProductDetails from './ProductDetails.jsx';
 import Header from './component/Header/index.jsx';
+import Home from './Page.jsx/Home.jsx';
+import CartPage from './Page.jsx/Cartpage.jsx';
+import ProductDetails from './Page.jsx/ProductDetails.jsx';
+import Footer from './component/Footer.jsx/index.jsx';
+import UserProfile from './component/UserInfo.jsx';
+import { UserOrder } from './component/UserOrder.jsx';
+import WishList from './component/UserWishList.jsx';
+import HomeLayout from './component/HomeLayout.jsx/index.jsx';
+import UserLayout from './component/UserLayout.jsx';
+import ProductsPage from './Page.jsx/ProductsPage.jsx';
+import { useShop } from './ShopContext.jsx';
+
+
+
+
 
 
 
 
 
 function App() {
+    const {
+    cartList,
+    productList,
+    handleAddToCart,
+    handleDelete,
+    userInfo,
+    handleLogout,
+    admin,
+    user,
+    addWishList
+  } = useShop();
 
-  
-  const [productList, setProductList] = useState([]);
-  const [cartList, setCartList] = useState ([]);
-  
-    const [user, setUser] = useState(null);
-    const [admin,setAdmin] = useState(null);  
-    useEffect(() => {
-        
-        const getSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            setUser(session?.user ?? null);
-        };
-        getSession();
-
-        //  Lắng nghe đăng nhập/đăng xuất
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
-        });
-
-        return () => subscription.unsubscribe();
-    }, []);
-
-    const handleLogout = async () => {
-        await supabase.auth.signOut();
-    
-    };
-//   // (() => {
-//   //   const savedCart = localStorage.getItem("myCart");
-//   //   return savedCart ? JSON.parse(savedCart) : [];
-//   // });
-
-//   // useEffect(() => {
-//   //   localStorage.setItem("myCart", JSON.stringify(cartList));
-//   // }, [cartList]); 
-
-useEffect(() => {
-  async function fetchProducts() {
-    const { data, error } = await supabase
-      .from("products")
-      .select("*");
-
-    if (error) {
-      console.error(error);
-      return;
-    }
-
-    setProductList(data); 
-  }
-
-  fetchProducts();
-  const channel = supabase
-      .channel('realtime products') 
-      .on('postgres_changes', 
-          { event: 'UPDATE', schema: 'public', table: 'products' }, 
-          (payload) => {
-            console.log('Có thay đổi nè:', payload);
-            
-            // Cập nhật lại state productList ngay lập tức
-            setProductList((prevList) => 
-              prevList.map((item) => 
-                item.id === payload.new.id ? payload.new : item
-              )
-            );
-          }
-      )
-      .subscribe();
-
-    // 3. Dọn dẹp khi component bị hủy (unmount)
-    return () => {
-      supabase.removeChannel(channel);
-    };
-
-}, []);
-
-  // Hàm xử lí khi nhấn thêm sản phẩm
-  const handleAddToCart = (product,buyquantity = 1) => {
-    if (product.stock <= 0) {
-      alert("Sản phẩm này đã hết hàng!");
-      return;
-    }
-    const isExit = cartList.find((item) => item.id === product.id);
-
-    if (isExit) {
-      setCartList(cartList.map((item) => {
-        if (item.id === product.id) {
-          return { ...item, quantity: item.quantity + buyquantity };
-        } else {
-          return item
-        }
-      }))
-    } else {
-      setCartList([...cartList, { ...product, quantity:  buyquantity }]);
-    }
-
-    const newProductList = productList.map(item => {
-      if (item.id === product.id) {
-        return { ...item, stock: item.stock - buyquantity };
-      }
-      return item; 
-    });
-    setProductList(newProductList);
-  }
-  
-
-// Hàm xử lí khi nhấn xóa
-  const handleDelete = (itemCanXoa) => {
-    const isExit = cartList.find((item) => item.id === itemCanXoa.id);
-    
-    if (isExit && isExit.quantity > 1) { 
-      setCartList(cartList.map((item) => { 
-        if (item.id === itemCanXoa.id) {
-          return {
-            ...item,
-            quantity: item.quantity - 1,
-          };
-        } else {
-          return item;
-        }
-      }));
-    } else {
-      setCartList(cartList.filter((item) => item.id !== itemCanXoa.id));
-    }
-    
-    // Cộng lại stock
-    setProductList(productList.map((item) => {
-      if (item.id === itemCanXoa.id) {
-        return { ...item, stock: item.stock + 1 };
-      } else {
-        return item;
-      }
-    }))
-  }
 
 
 
   return (
-    <div className=''>
-      {/* Header luôn hiển thị */}
+    <div className='flex flex-col min-h-screen'>
         <Header cartList={cartList} handleLogout={handleLogout} admin={admin} user={user} />
 
-      {/* Phần nội dung thay đổi theo Router */}
-      
+    <div className='flex flex-1 '>
         <Routes>
-           <Route path="/" element={
-              <Home cartList={cartList} productList={productList} handleAddToCart={handleAddToCart}
-               
+
+     
+        <Route element={<HomeLayout userInfo={userInfo} />}>
+            
+            <Route path="/" element={
+              <Home 
+                userInfo={userInfo} 
+                cartList={cartList} 
+                productList={productList} 
+                handleAddToCart={handleAddToCart} 
               />
-           } />
+            } />
+              <Route path="brand/:categoryName" element={
+      <ProductsPage
+      addWishList={addWishList}
+            handleAddToCart={handleAddToCart}
+                 cartList={cartList} 
+                productList={productList} 
+             // Nhớ truyền prop này
+        />
+    } />
 
-           <Route path="/cart" element={
-              <CartPage cartList={cartList} handleAddToCart={handleAddToCart} handleDelete={handleDelete}
-                
+         
+            <Route path="product/:id" element={
+              <ProductDetails 
+                cartList={cartList} 
+                handleAddToCart={handleAddToCart} 
+                productList={productList} 
               />
-           } />
-            <Route path="/product/:id" element={
-                <ProductDetails cartList={cartList} handleAddToCart={handleAddToCart} productList={productList} 
-               
+            } />
 
-            />
-            }/>
+            
+            <Route path="cart" element={
+               <CartPage 
+                 cartList={cartList} 
+                 handleAddToCart={handleAddToCart} 
+                 handleDelete={handleDelete} 
+               />
+            } />
+        </Route>
 
-           
-        </Routes>
+
+       
+        <Route path="/user" element={<UserLayout userInfo={userInfo} />}>
+
+            <Route index element={<Navigate to="profile" replace />} />
+            
+            <Route path="profile" element={<UserProfile userInfo={userInfo}/>} /> 
+            <Route path="orders" element={<UserOrder />} /> 
+            <Route path="wishlist" element={<WishList productList={productList}  
+             />} /> 
+        </Route>
+
+      </Routes>
+
+    </div>
+      <Footer/>
 
           
       </div>

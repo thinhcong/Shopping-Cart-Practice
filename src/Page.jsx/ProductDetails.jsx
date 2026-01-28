@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import Header from './component/Header';
 
-const ProductDetails = ({ productList, handleAddToCart, cartList }) => {
+
+const ProductDetails = ({ productList, handleAddToCart,  }) => {
   const params = useParams();
   const [product, setProduct] = useState(null);
   
@@ -14,13 +14,13 @@ const ProductDetails = ({ productList, handleAddToCart, cartList }) => {
     if (productList && productList.length > 0) {
       const foundProduct = productList.find(item => item.id.toString() === params.id);
       setProduct(foundProduct);
-    }
+    }  
   }, [productList, params.id]);
 
  const handleAdd = () => {
     if (buyquantity >= 1) {
         setbuyQuantity(prev => prev + 1);
-        console.log("Add")
+        
     }
     
    
@@ -32,13 +32,6 @@ const ProductDetails = ({ productList, handleAddToCart, cartList }) => {
     }
   }
 
-  // Hàm tăng số lượng
-  
-
-  // Hàm giảm số lượng (Không cho giảm dưới 1)
- 
-
-  // Nếu chưa tìm thấy sản phẩm
   if (!product) {
     return <div className="min-h-screen flex items-center justify-center text-xl">Đang tải dữ liệu...</div>;
   }
