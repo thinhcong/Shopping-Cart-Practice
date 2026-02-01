@@ -5,7 +5,7 @@ import { supabase } from '../supabaseClient.js/index.jsx'
 import ProductCard from '../component/ProductCards.jsx';
 import { useParams } from 'react-router-dom'
  const ProductsPage = ({handleAddToCart,handleDelete}) => {
-    const [products, setProducts] = useState([])    
+const [products, setProducts] = useState([])    
   const { categoryName } = useParams();
     useEffect(() => {
         const fetchProducts = async () => {

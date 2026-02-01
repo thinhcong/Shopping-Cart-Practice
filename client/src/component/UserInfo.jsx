@@ -12,6 +12,8 @@ const UserProfile = ({ userInfo }) => {
   
 
   useEffect(() => {
+    
+    
     if (userInfo) {
       setFormData({
         fullName: userInfo.full_name || '',
@@ -70,7 +72,7 @@ throw (error);
             {/* Tên đăng nhập */}
             <div className="flex flex-col">
               <label className="text-sm font-semibold text-gray-700 mb-2">
-                Tên đăng nhập / Email
+                 Email
               </label>
               <div className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-md text-gray-500 cursor-not-allowed flex justify-between items-center">
                 <span>{formData.email}</span>

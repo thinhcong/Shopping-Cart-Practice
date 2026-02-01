@@ -17,6 +17,8 @@ import AdminUsers from './component/AdminUsers.jsx';
 import AdminProducts from './component/AdminProducts.jsx';
 import AdminOrder from './component/AdminOrder.jsx';
 import { AdminLayout } from './component/AdminLayout.jsx';
+import PaymentFail from './component/PaymentFail.jsx';
+import PaymentSuccess from './component/PaymentSuccess.jsx';
 
 
 
@@ -108,6 +110,9 @@ function App() {
             <Route path="users" element={<AdminUsers/>} />
 
           </Route>
+
+          <Route path="/payment-fail" element={<PaymentFail/>} />
+          <Route path="/payment-success" element={<PaymentSuccess/>} />
           
 
 

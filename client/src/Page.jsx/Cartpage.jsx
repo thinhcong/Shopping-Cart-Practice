@@ -2,38 +2,58 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import { useShop } from "../ShopContext.jsx";
+import { supabase } from "../supabaseClient.js";
 
 
 
 function CartPage({ cartList, handleDelete, handleAddToCart }) {
-  const [paymentMethod, setPaymentMethod] = useState("COD");
-  const { userInfo } = useShop();
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const { userInfo,products } = useShop();
 
   const totalAmount = cartList.reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
+/// handle Checkout 
+const HandleCheckout = ()=> {
+  if(!paymentMethod) return alert("Vui lồng chọn phương thức thanh toán")
+  if (paymentMethod === "COD"){
+    handelCOD()
+  }else {
+    handleVnPay()
+  }}
+  
 
-  // ===== ENTRY CHECKOUT =====
-  const handleCheckout = async () => {
-    if (paymentMethod === "MOMO") {
-      await handleMomoPayment();
-    } else {
-      await handleCOD();
-    }
+
+
+//ENTRY CHECKOUT 
+  const handleVnPay = async () => {
+   const res = await fetch("http://localhost:5000/api/payment/vnpay",{
+    method:'POST',
+    headers:{ 'Content-Type': 'application/json'},
+    body:JSON.stringify({
+      amount:totalAmount
+    })
+    
+     
+   })
+   const data= await res.json();
+   window.location.href=data.paymentUrl
   };
 
-  // ===== CREATE ORDER (COMMON) =====
+  // Create order
   const createOrder = async (method) => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    
 
     const { data, error } = await supabase
       .from("orders")
       .insert([
         {
           user_id: user?.id || null,
+          created_at: new Date().toISOString(),
           customer_name: userInfo?.full_name || "Khách lẻ",
           customer_phone: userInfo?.phone || "",
           shipping_address: userInfo?.address || "",
@@ -42,6 +62,7 @@ function CartPage({ cartList, handleDelete, handleAddToCart }) {
           payment_method: method,
           status: "pending",
           note: "",
+          // items:products.brand
         },
       ])
       .select()
@@ -49,11 +70,11 @@ function CartPage({ cartList, handleDelete, handleAddToCart }) {
 
     if (error) throw error;
 
-    return data; // trả về full order
+    return data; 
   };
 
   // ===== COD =====
-  const handleCOD = async () => {
+  const  handelCOD  = async () => {
     try {
       await createOrder("cod");
       alert("Đặt hàng thành công! Thanh toán khi nhận hàng.");
@@ -63,33 +84,8 @@ function CartPage({ cartList, handleDelete, handleAddToCart }) {
     }
   };
 
-  // ===== MOMO =====
-  const handleMomoPayment = async () => {
-    try {
-      const order = await createOrder("momo");
-
-      const res = await fetch("http://localhost:3001/payment/momo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount: totalAmount,
-          orderId: order.id,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.payUrl) {
-        window.location.href = data.payUrl;
-      } else {
-        throw new Error("No payUrl returned");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Thanh toán MoMo thất bại");
-    }
-  };
-
+  
+ 
   return (
     <div className="container mx-auto p-10 bg-white min-h-screen">
       {cartList.length > 0 && (
@@ -173,20 +169,20 @@ function CartPage({ cartList, handleDelete, handleAddToCart }) {
             </div>
 
             <div
-              onClick={() => setPaymentMethod("MOMO")}
+              onClick={() => setPaymentMethod("VNPAY")}
               className={`flex items-center gap-3 p-4 border rounded cursor-pointer
-              ${paymentMethod === "MOMO" ? "border-pink-500" : "border-gray-300"}`}
+              ${paymentMethod === "VNPAY" ? "border-pink-500" : "border-gray-300"}`}
             >
               <img
-                src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png"
-                alt="momo"
+                src="https://vinadesign.vn/uploads/images/2023/05/vnpay-logo-vinadesign-25-12-57-55.jpg"
+                alt="VNPAYN"
                 className="w-10 h-10"
               />
-              <p className="font-semibold text-pink-600">Thanh toán MoMo</p>
+              <p className="font-semibold text-pink-600">Thanh toán VN PAY</p>
             </div>
           </div>
 
-          {/* TOTAL */}
+        
           <div className="flex justify-end mt-8 items-center gap-6">
             <div className="text-2xl font-bold">
               Tổng cộng:
@@ -194,18 +190,19 @@ function CartPage({ cartList, handleDelete, handleAddToCart }) {
                 {totalAmount.toLocaleString()} ₫
               </span>
             </div>
-
-            <button
-              onClick={handleCheckout}
+             <button
+              onClick={HandleCheckout}
               className="bg-black text-white text-lg px-8 py-3 rounded"
             >
               Xác nhận thanh toán
             </button>
+            
+            
           </div>
         </div>
       )}
     </div>
   );
-}
 
+}  
 export default CartPage;
