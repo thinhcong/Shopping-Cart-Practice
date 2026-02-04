@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const paymentController = require('../controllers/payment.controller');
+const vnpayController = require('../controllers/vnpay.controller');
+router.get('/vnpay-return', vnpayController.vnpayReturn);
 
-router.post('/momo', paymentController.createMoMoPayment);
-router.post('/momo-ipn', paymentController.handleMoMoIPN);
+router.post('/vnpay', vnpayController.createVNPayPayment);
 
-module.exports = router;
+module.exports = router;   
